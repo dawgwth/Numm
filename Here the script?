@@ -1,0 +1,193 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("CoreGui")
+
+-- Clear previous GUI
+local existing = PlayerGui:FindFirstChild("MoveGui")
+if existing then existing:Destroy() end
+
+-- Main ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MoveGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+-- Move Button
+local moveButton = Instance.new("TextButton")
+moveButton.Size = UDim2.new(0, 50, 0, 50)
+moveButton.Position = UDim2.new(0.5, -25, 0.5, -25)
+moveButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+moveButton.BorderSizePixel = 0
+moveButton.Text = "Move"
+moveButton.TextColor3 = Color3.new(1, 1, 1)
+moveButton.Font = Enum.Font.SourceSansBold
+moveButton.TextSize = 20
+moveButton.Active = true
+moveButton.Draggable = true
+moveButton.Parent = screenGui
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(1, 0)
+btnCorner.Parent = moveButton
+
+-- Window Frame
+local window = Instance.new("Frame")
+window.Size = UDim2.new(0, 600, 0, 300) -- Adjusted height
+window.Position = UDim2.new(0.5, -300, 0.5, -150) -- Adjusted position
+window.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+window.Visible = false
+window.Active = true
+window.Draggable = true
+window.Parent = screenGui
+
+-- Title Bar Background
+local titleBg = Instance.new("Frame")
+titleBg.Size = UDim2.new(1, 0, 0, 36)
+titleBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBg.BackgroundTransparency = 0.5
+titleBg.BorderSizePixel = 0
+titleBg.Parent = window
+
+-- Title Label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 36)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Universal Script or smth"
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextSize = 26
+titleLabel.Parent = titleBg
+
+-- Main Container Box (group background)
+local mainContainer = Instance.new("Frame")
+mainContainer.Size = UDim2.new(0, 560, 0, 220) -- Adjusted height
+mainContainer.Position = UDim2.new(0.02, 0, 0.2, 0) -- Adjusted position
+mainContainer.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+mainContainer.BackgroundTransparency = 0.3
+mainContainer.BorderSizePixel = 0
+mainContainer.Parent = window
+
+-- UIPadding to add horizontal and vertical padding inside main container
+local mainPadding = Instance.new("UIPadding")
+mainPadding.PaddingLeft = UDim.new(0, 15)
+mainPadding.PaddingRight = UDim.new(0, 15)
+mainPadding.PaddingTop = UDim.new(0, 15)
+mainPadding.PaddingBottom = UDim.new(0, 15)
+mainPadding.Parent = mainContainer
+
+-- Left Container Box (group background)
+local leftContainer = Instance.new("Frame")
+leftContainer.Size = UDim2.new(0.45, 0, 1, 0)
+leftContainer.BackgroundTransparency = 1
+leftContainer.BorderSizePixel = 0
+leftContainer.Parent = mainContainer
+
+-- UIListLayout for left buttons
+local leftLayout = Instance.new("UIListLayout")
+leftLayout.Padding = UDim.new(0, 10)
+leftLayout.FillDirection = Enum.FillDirection.Vertical
+leftLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+leftLayout.Parent = leftContainer
+
+-- Left buttons (3)
+local leftButtonNames = {"Infinite Yield", "J Dark Spawner (gag)", "FE SCP 096"}
+local leftButtonFunctions = {
+    function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/edgeiy/infiniteyield/master/source'))()
+    end,
+    function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Coming Soon",
+            Text = "This feature is coming soon!",
+            Duration = 5
+        })
+    end,
+    function()
+        loadstring(game:HttpGet("https://pastefy.app/YsJgITXR/raw"))()
+    end
+}
+
+for i = 1, 3 do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Adjusted button height
+    btn.BackgroundColor3 = Color3.new(1, 1, 1) -- White background
+    btn.BorderSizePixel = 0
+    btn.Text = leftButtonNames[i]
+    btn.TextColor3 = Color3.new(0, 0, 0) -- Black text
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    btn.LayoutOrder = i
+    btn.Parent = leftContainer
+
+    btn.MouseButton1Click:Connect(function()
+        window.Visible = false
+        print("Clicked Button "..leftButtonNames[i])
+        leftButtonFunctions[i]()
+    end)
+end
+
+-- Right Container Box (group background)
+local rightContainer = Instance.new("Frame")
+rightContainer.Size = UDim2.new(0.45, 0, 1, 0)
+rightContainer.Position = UDim2.new(0.55, 0, 0, 0)
+rightContainer.BackgroundTransparency = 1
+rightContainer.BorderSizePixel = 0
+rightContainer.Parent = mainContainer
+
+-- UIListLayout for right buttons
+local rightLayout = Instance.new("UIListLayout")
+rightLayout.Padding = UDim.new(0, 10)
+rightLayout.FillDirection = Enum.FillDirection.Vertical
+rightLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+rightLayout.Parent = rightContainer
+
+-- Right buttons (3)
+local rightButtonNames = {"C00LKIDD gui", "Button 5", "Button 6"}
+local rightButtonFunctions = {
+    function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hyperionhax/c00lgui/refs/heads/main/CoolGui.lua"))()
+    end,
+    function()
+        -- Placeholder for future functionality
+    end,
+    function()
+        -- Placeholder for future functionality
+    end
+}
+
+for i = 1, 3 do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Adjusted button height
+    btn.BackgroundColor3 = Color3.new(1, 1, 1) -- White background
+    btn.BorderSizePixel = 0
+    btn.Text = rightButtonNames[i]
+    btn.TextColor3 = Color3.new(0, 0, 0) -- Black text
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    btn.LayoutOrder = i
+    btn.Parent = rightContainer
+
+    btn.MouseButton1Click:Connect(function()
+        window.Visible = false
+        print("Clicked Button "..rightButtonNames[i])
+        rightButtonFunctions[i]()
+    end)
+end
+
+-- Footer Label
+local footerLabel = Instance.new("TextLabel")
+footerLabel.Size = UDim2.new(1, 0, 0, 24)
+footerLabel.Position = UDim2.new(0, 0, 1, -24)
+footerLabel.BackgroundTransparency = 1
+footerLabel.Text = "Made by Numm Free and Only script"
+footerLabel.Font = Enum.Font.SourceSansItalic
+footerLabel.TextColor3 = Color3.new(1,1,1)
+footerLabel.TextSize = 16
+footerLabel.Parent = window
+
+-- Toggle window visibility on Move button click
+moveButton.MouseButton1Click:Connect(function()
+    window.Visible = not window.Visible
+end)
