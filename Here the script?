@@ -1,193 +1,320 @@
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui") or game:GetService("CoreGui")
+local Players      = game:GetService("Players")
+local RS           = game:GetService("RunService")
+local UIS          = game:GetService("UserInputService")
+local StarterGui   = game:GetService("StarterGui")
+local CoreGui      = game:GetService("CoreGui")
+local LP           = Players.LocalPlayer
 
--- Clear previous GUI
-local existing = PlayerGui:FindFirstChild("MoveGui")
-if existing then existing:Destroy() end
+local guiParent = (gethui and gethui()) or CoreGui
+local old = guiParent:FindFirstChild("MoveGui")
+if old then old:Destroy() end
 
--- Main ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MoveGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
+_G.GUI_TOGGLE_KEY = _G.GUI_TOGGLE_KEY or Enum.KeyCode.F
+_G.FLY_TOGGLE_KEY = _G.FLY_TOGGLE_KEY or Enum.KeyCode.Z
+_G.LAST_TAB       = _G.LAST_TAB       or "Main"
 
--- Move Button
-local moveButton = Instance.new("TextButton")
-moveButton.Size = UDim2.new(0, 50, 0, 50)
-moveButton.Position = UDim2.new(0.5, -25, 0.5, -25)
-moveButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-moveButton.BorderSizePixel = 0
-moveButton.Text = "Move"
-moveButton.TextColor3 = Color3.new(1, 1, 1)
-moveButton.Font = Enum.Font.SourceSansBold
-moveButton.TextSize = 20
-moveButton.Active = true
-moveButton.Draggable = true
-moveButton.Parent = screenGui
-
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(1, 0)
-btnCorner.Parent = moveButton
-
--- Window Frame
-local window = Instance.new("Frame")
-window.Size = UDim2.new(0, 600, 0, 300) -- Adjusted height
-window.Position = UDim2.new(0.5, -300, 0.5, -150) -- Adjusted position
-window.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-window.Visible = false
-window.Active = true
-window.Draggable = true
-window.Parent = screenGui
-
--- Title Bar Background
-local titleBg = Instance.new("Frame")
-titleBg.Size = UDim2.new(1, 0, 0, 36)
-titleBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleBg.BackgroundTransparency = 0.5
-titleBg.BorderSizePixel = 0
-titleBg.Parent = window
-
--- Title Label
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 36)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Universal Script or smth"
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.TextSize = 26
-titleLabel.Parent = titleBg
-
--- Main Container Box (group background)
-local mainContainer = Instance.new("Frame")
-mainContainer.Size = UDim2.new(0, 560, 0, 220) -- Adjusted height
-mainContainer.Position = UDim2.new(0.02, 0, 0.2, 0) -- Adjusted position
-mainContainer.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-mainContainer.BackgroundTransparency = 0.3
-mainContainer.BorderSizePixel = 0
-mainContainer.Parent = window
-
--- UIPadding to add horizontal and vertical padding inside main container
-local mainPadding = Instance.new("UIPadding")
-mainPadding.PaddingLeft = UDim.new(0, 15)
-mainPadding.PaddingRight = UDim.new(0, 15)
-mainPadding.PaddingTop = UDim.new(0, 15)
-mainPadding.PaddingBottom = UDim.new(0, 15)
-mainPadding.Parent = mainContainer
-
--- Left Container Box (group background)
-local leftContainer = Instance.new("Frame")
-leftContainer.Size = UDim2.new(0.45, 0, 1, 0)
-leftContainer.BackgroundTransparency = 1
-leftContainer.BorderSizePixel = 0
-leftContainer.Parent = mainContainer
-
--- UIListLayout for left buttons
-local leftLayout = Instance.new("UIListLayout")
-leftLayout.Padding = UDim.new(0, 10)
-leftLayout.FillDirection = Enum.FillDirection.Vertical
-leftLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
-leftLayout.Parent = leftContainer
-
--- Left buttons (3)
-local leftButtonNames = {"Infinite Yield", "J Dark Spawner (gag)", "FE SCP 096"}
-local leftButtonFunctions = {
-    function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/edgeiy/infiniteyield/master/source'))()
-    end,
-    function()
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Coming Soon",
-            Text = "This feature is coming soon!",
-            Duration = 5
-        })
-    end,
-    function()
-        loadstring(game:HttpGet("https://pastefy.app/YsJgITXR/raw"))()
-    end
-}
-
-for i = 1, 3 do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Adjusted button height
-    btn.BackgroundColor3 = Color3.new(1, 1, 1) -- White background
-    btn.BorderSizePixel = 0
-    btn.Text = leftButtonNames[i]
-    btn.TextColor3 = Color3.new(0, 0, 0) -- Black text
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 18
-    btn.LayoutOrder = i
-    btn.Parent = leftContainer
-
-    btn.MouseButton1Click:Connect(function()
-        window.Visible = false
-        print("Clicked Button "..leftButtonNames[i])
-        leftButtonFunctions[i]()
-    end)
+local function notifyGUI(title, text, dur)
+   pcall(function()
+      StarterGui:SetCore("SendNotification",{Title=title,Text=text,Duration=dur or 3})
+   end)
+end
+local function digitsOnly(tb)
+   tb:GetPropertyChangedSignal("Text"):Connect(function()
+      tb.Text = tb.Text:gsub("%D",""):sub(1,3)
+   end)
 end
 
--- Right Container Box (group background)
-local rightContainer = Instance.new("Frame")
-rightContainer.Size = UDim2.new(0.45, 0, 1, 0)
-rightContainer.Position = UDim2.new(0.55, 0, 0, 0)
-rightContainer.BackgroundTransparency = 1
-rightContainer.BorderSizePixel = 0
-rightContainer.Parent = mainContainer
+notifyGUI("Join my discord pls","https://discord.gg/EaemCQ9C",6)
 
--- UIListLayout for right buttons
-local rightLayout = Instance.new("UIListLayout")
-rightLayout.Padding = UDim.new(0, 10)
-rightLayout.FillDirection = Enum.FillDirection.Vertical
-rightLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
-rightLayout.Parent = rightContainer
+local gui = Instance.new("ScreenGui", guiParent)
+gui.Name, gui.ResetOnSpawn = "MoveGui", false
 
--- Right buttons (3)
-local rightButtonNames = {"C00LKIDD gui", "Button 5", "Button 6"}
-local rightButtonFunctions = {
-    function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hyperionhax/c00lgui/refs/heads/main/CoolGui.lua"))()
-    end,
-    function()
-        -- Placeholder for future functionality
-    end,
-    function()
-        -- Placeholder for future functionality
-    end
-}
+-- Move toggle button
+local moveBtn = Instance.new("TextButton", gui)
+moveBtn.Size = UDim2.new(0,70,0,35)
+moveBtn.Position = UDim2.new(0,10,0,10)
+moveBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+moveBtn.Text = "Move"
+moveBtn.Font = Enum.Font.SourceSansBold
+moveBtn.TextSize = 20
+moveBtn.TextColor3 = Color3.new(1,1,1)
+moveBtn.BorderSizePixel = 0
+moveBtn.Draggable = true
 
-for i = 1, 3 do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 50) -- Adjusted button height
-    btn.BackgroundColor3 = Color3.new(1, 1, 1) -- White background
-    btn.BorderSizePixel = 0
-    btn.Text = rightButtonNames[i]
-    btn.TextColor3 = Color3.new(0, 0, 0) -- Black text
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 18
-    btn.LayoutOrder = i
-    btn.Parent = rightContainer
+-- Main window
+local win = Instance.new("Frame", gui)
+win.Size = UDim2.new(0,720,0,460)
+win.Position = UDim2.new(0.5,-360,0.5,-230)
+win.BackgroundColor3 = Color3.fromRGB(60,60,60)
+win.Visible = false
+win.Active, win.Draggable = true, true
 
-    btn.MouseButton1Click:Connect(function()
-        window.Visible = false
-        print("Clicked Button "..rightButtonNames[i])
-        rightButtonFunctions[i]()
-    end)
+if UIS.TouchEnabled then
+    win.Size = UDim2.new(0, 360, 0, 280)           
+    win.Position = UDim2.new(0.5, -180, 0.5, -140) 
 end
 
--- Footer Label
-local footerLabel = Instance.new("TextLabel")
-footerLabel.Size = UDim2.new(1, 0, 0, 24)
-footerLabel.Position = UDim2.new(0, 0, 1, -24)
-footerLabel.BackgroundTransparency = 1
-footerLabel.Text = "Made by Numm Free and Only script"
-footerLabel.Font = Enum.Font.SourceSansItalic
-footerLabel.TextColor3 = Color3.new(1,1,1)
-footerLabel.TextSize = 16
-footerLabel.Parent = window
 
--- Toggle window visibility on Move button click
-moveButton.MouseButton1Click:Connect(function()
-    window.Visible = not window.Visible
+local bar = Instance.new("Frame", win)
+bar.Size = UDim2.new(1,0,0,36)
+bar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+
+local title = Instance.new("TextLabel", bar)
+title.Size = UDim2.new(1,-40,1,0)
+title.Position = UDim2.new(0,10,0,0)
+title.BackgroundTransparency = 1
+title.Text = "Universal Script GUI"
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
+title.TextColor3 = Color3.new(1,1,1)
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local closeX = Instance.new("TextButton", bar)
+closeX.Size = UDim2.new(0,30,0,30)
+closeX.Position = UDim2.new(1,-35,0,3)
+closeX.BackgroundColor3 = Color3.fromRGB(255,0,0)
+closeX.Text = "X"
+closeX.Font = Enum.Font.SourceSansBold
+closeX.TextSize = 20
+closeX.TextColor3 = Color3.new(1,1,1)
+closeX.BorderSizePixel = 0
+closeX.MouseButton1Click:Connect(function() win.Visible = false end)
+
+local side = Instance.new("Frame", win)
+side.Size = UDim2.new(0,140,1,-36)
+side.Position = UDim2.new(0,0,0,36)
+side.BackgroundColor3 = Color3.fromRGB(40,40,40)
+local sideLayout = Instance.new("UIListLayout", side) sideLayout.Padding = UDim.new(0,5)
+
+local tabs, pages = {}, {}
+local function newTab(name, order)
+   local btn = Instance.new("TextButton", side)
+   btn.LayoutOrder = order
+   btn.Size = UDim2.new(1,-10,0,30)
+   btn.Position = UDim2.new(0,5,0,0)
+   btn.Text = name
+   btn.Font = Enum.Font.SourceSansBold
+   btn.TextSize = 18
+   btn.TextColor3 = Color3.new(1,1,1)
+   btn.BackgroundColor3 = Color3.fromRGB(90,90,90)
+   btn.BorderSizePixel = 0
+   tabs[name] = btn
+
+   local page = Instance.new("Frame", win)
+   page.Size = UDim2.new(1,-150,1,-46)
+   page.Position = UDim2.new(0,150,0,46)
+   page.BackgroundTransparency = 1
+   page.Visible = false
+   pages[name] = page
+
+   btn.MouseButton1Click:Connect(function()
+      for n,p in pairs(pages) do
+         p.Visible = false
+         tabs[n].BackgroundColor3 = Color3.fromRGB(90,90,90)
+      end
+      page.Visible = true
+      btn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+      _G.LAST_TAB = name
+   end)
+end
+newTab("Main",1)
+newTab("Settings",2)
+
+
+local main = pages["Main"]
+
+-- LoopSpeed row
+local row = Instance.new("Frame", main)
+row.Size = UDim2.new(1,0,0,50)
+row.Position = UDim2.new(0,0,0,10)
+row.BackgroundTransparency = 1
+local rowLayout = Instance.new("UIListLayout", row)
+rowLayout.FillDirection = Enum.FillDirection.Horizontal
+rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+rowLayout.Padding = UDim.new(0,10)
+
+local speedBox = Instance.new("TextBox", row)
+speedBox.Size = UDim2.new(0,100,1,0)
+speedBox.Text = "16"
+speedBox.Font = Enum.Font.SourceSansBold
+speedBox.TextSize = 20
+speedBox.BackgroundColor3 = Color3.new(1,1,1)
+speedBox.TextColor3 = Color3.new(0,0,0)
+speedBox.BorderSizePixel = 0
+digitsOnly(speedBox)
+
+local function rowBtn(txt)
+   local b = Instance.new("TextButton", row)
+   b.Size = UDim2.new(0,150,1,0)
+   b.Text = txt
+   b.Font = Enum.Font.SourceSansBold
+   b.TextSize = 20
+   b.BackgroundColor3 = Color3.new(1,1,1)
+   b.TextColor3 = Color3.new(0,0,0)
+   b.BorderSizePixel = 0
+   return b
+end
+local loopBtn   = rowBtn("LoopSpeed")
+local unloopBtn = rowBtn("UnLoopSpeed")
+
+local buttonsContainer = Instance.new("Frame", main)
+buttonsContainer.Size = UDim2.new(1, -20, 0, 270)
+buttonsContainer.Position = UDim2.new(0, 10, 0, 70)
+buttonsContainer.BackgroundTransparency = 1
+
+local gridLayout = Instance.new("UIGridLayout", buttonsContainer)
+gridLayout.CellSize = UDim2.new(0, 340, 0, 40)  
+gridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
+gridLayout.FillDirection = Enum.FillDirection.Horizontal
+gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+local function gridBtn(text, cb)
+    local b = Instance.new("TextButton", buttonsContainer)
+    b.Size = UDim2.new(0, 340, 0, 40) 
+    b.Text = text
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 18
+    b.BackgroundColor3 = Color3.new(1, 1, 1)
+    b.TextColor3 = Color3.new(0, 0, 0)
+    b.BorderSizePixel = 0
+    b.MouseButton1Click:Connect(cb)
+    return b
+end
+
+
+gridBtn("Infinite Yield", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 end)
+gridBtn("J Dark Spawner (gag)", function()
+    notifyGUI("Universal GUI", "Coming Soon", 3)
+end)
+gridBtn("FE SCP-096", function()
+    loadstring(game:HttpGet("https://pastefy.app/YsJgITXR/raw"))()
+end)
+gridBtn("C00LKIDD GUI", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/hyperionhax/c00lgui/refs/heads/main/CoolGui.lua"))()
+end)
+gridBtn("Lit nothing", function()
+    notifyGUI("Universal GUI", "Coming Soon", 3)
+end)
+gridBtn("Lit nothing", function()
+    notifyGUI("Universal GUI", "Coming Soon", 3)
+end)
+
+
+local loopConn
+local function stopLoop()
+   if loopConn then loopConn:Disconnect() loopConn = nil end
+   local h = LP.Character and LP.Character:FindFirstChildWhichIsA("Humanoid")
+   if h then h.WalkSpeed = 16 end
+end
+loopBtn.MouseButton1Click:Connect(function()
+   local v = tonumber(speedBox.Text)
+   if not v or v <= 0 then return notifyGUI("Universal GUI", "Enter positive number", 3) end
+   stopLoop()
+   loopConn = RS.RenderStepped:Connect(function()
+      local h = LP.Character and LP.Character:FindFirstChildWhichIsA("Humanoid")
+      if h then h.WalkSpeed = v end
+   end)
+end)
+unloopBtn.MouseButton1Click:Connect(stopLoop)
+
+local settings = pages["Settings"]
+local function keyEntry(label, keyRef, y, setter)
+   local lab = Instance.new("TextLabel", settings)
+   lab.Position = UDim2.new(0,10,0,y)
+   lab.Size = UDim2.new(0,120,0,30)
+   lab.BackgroundTransparency = 1
+   lab.Text = label
+   lab.TextColor3 = Color3.new(1,1,1)
+   lab.Font = Enum.Font.SourceSans
+   lab.TextSize = 20
+
+   local box = Instance.new("TextBox", settings)
+   box.Position = UDim2.new(0,140,0,y)
+   box.Size = UDim2.new(0,60,0,30)
+   box.Text = keyRef.Name
+   box.Font = Enum.Font.SourceSansBold
+   box.TextSize = 20
+   box.BackgroundColor3 = Color3.new(1,1,1)
+   box.TextColor3 = Color3.new(0,0,0)
+   box.BorderSizePixel = 0
+   box.ClearTextOnFocus = false
+
+   box:GetPropertyChangedSignal("Text"):Connect(function()
+      local newKey = Enum.KeyCode[box.Text:sub(1,1):upper()]
+      if newKey then setter(newKey) end
+      box.Text = keyRef.Name
+      UIS:SetFocusedTextBox(nil)
+   end)
+end
+keyEntry("GUI Key:", _G.GUI_TOGGLE_KEY, 20, function(k) _G.GUI_TOGGLE_KEY = k end)
+keyEntry("Fly Key:", _G.FLY_TOGGLE_KEY, 60, function(k) _G.FLY_TOGGLE_KEY = k end)
+
+local flying, flySpeed, bv, bg = false, 50, nil, nil
+local function stopFly()
+   if not flying then return end
+   flying = false
+   if bv then bv:Destroy() bv = nil end
+   if bg then bg:Destroy() bg = nil end
+   local hum = LP.Character and LP.Character:FindFirstChildWhichIsA("Humanoid")
+   if hum then task.delay(0.1, function() hum.PlatformStand = false end) end
+end
+local function startFly()
+   if flying then return end
+   local char = LP.Character
+   local hrp = char and char:FindFirstChild("HumanoidRootPart")
+   local hum = char and char:FindFirstChildWhichIsA("Humanoid")
+   if not hrp or not hum then return end
+
+   flying = true
+   hum.PlatformStand = true
+   bg = Instance.new("BodyGyro", hrp)
+   bg.P, bg.MaxTorque = 9e9, Vector3.new(9e9, 9e9, 9e9)
+   bv = Instance.new("BodyVelocity", hrp)
+   bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+   notifyGUI("Universal GUI", "Fly ON - E/Q: up/down  |  C/X: speed", 4)
+end
+local function toggleFly() if flying then stopFly() else startFly() end end
+
+RS.RenderStepped:Connect(function()
+   if not flying or not bv or not bg then return end
+   local cam = workspace.CurrentCamera
+   bg.CFrame = cam.CFrame
+   local dir = Vector3.zero
+   if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+   if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+   if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+   if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+   if UIS:IsKeyDown(Enum.KeyCode.E) then dir += cam.CFrame.UpVector end
+   if UIS:IsKeyDown(Enum.KeyCode.Q) then dir -= cam.CFrame.UpVector end
+   bv.Velocity = dir.Magnitude > 0 and dir.Unit * flySpeed or Vector3.zero
+end)
+LP.CharacterAdded:Connect(stopFly)
+
+UIS.InputBegan:Connect(function(inp, gp)
+   if gp or UIS:GetFocusedTextBox() then return end
+   if inp.KeyCode == _G.GUI_TOGGLE_KEY then
+      win.Visible = not win.Visible
+      if win.Visible then tabs[_G.LAST_TAB]:MouseButton1Click() end
+   elseif inp.KeyCode == _G.FLY_TOGGLE_KEY then
+      toggleFly()
+   elseif flying then
+      if inp.KeyCode == Enum.KeyCode.C then
+         flySpeed += 20
+         notifyGUI("Universal GUI", "Speed: " .. flySpeed, 2)
+      elseif inp.KeyCode == Enum.KeyCode.X then
+         flySpeed = math.max(20, flySpeed - 20)
+         notifyGUI("Universal GUI", "Speed: " .. flySpeed, 2)
+      end
+   end
+end)
+
+moveBtn.MouseButton1Click:Connect(function()
+   win.Visible = not win.Visible
+   if win.Visible then tabs[_G.LAST_TAB]:MouseButton1Click() end
+end)
+
+-- Show last tab on start
+tabs[_G.LAST_TAB]:MouseButton1Click()
