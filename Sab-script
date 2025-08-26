@@ -1,1 +1,27 @@
-ffff
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MessageGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
+
+local blackFrame = Instance.new("Frame")
+blackFrame.Size = UDim2.new(1,0,1,0)
+blackFrame.Position = UDim2.new(0,0,0,0)
+blackFrame.BackgroundColor3 = Color3.new(0,0,0)
+blackFrame.BorderSizePixel = 0
+blackFrame.Parent = screenGui
+
+local message = Instance.new("TextLabel")
+message.Size = UDim2.new(1,0,1,0)
+message.Position = UDim2.new(0,0,0,0)
+message.BackgroundTransparency = 1
+message.Text = "Fuh you mean leak lennon? I AINT LEAKING SHITTT"
+message.TextColor3 = Color3.fromRGB(255, 0, 0) -- red text
+message.Font = Enum.Font.Bangers
+message.TextScaled = true
+message.TextWrapped = true
+message.Parent = blackFrame
